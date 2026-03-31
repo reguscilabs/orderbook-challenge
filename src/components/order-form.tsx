@@ -6,7 +6,7 @@ import { api } from "../../convex/_generated/api";
 import { Id } from "../../convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 
-export function OrderForm() {
+export function OrderForm({ tokenId }: { tokenId: Id<"tokens"> }) {
   const [side, setSide] = useState<"buy" | "sell">("buy");
   const [price, setPrice] = useState("");
   const [quantity, setQuantity] = useState("");
@@ -24,6 +24,7 @@ export function OrderForm() {
     if (!userId || !price || !quantity) return;
 
     await placeOrder({
+      tokenId,
       side,
       price: parseFloat(price),
       quantity: parseFloat(quantity),
@@ -76,8 +77,8 @@ export function OrderForm() {
           </label>
           <input
             type="number"
-            step="0.01"
-            min="0.01"
+            step="any"
+            min="0.000001"
             value={price}
             onChange={(e) => setPrice(e.target.value)}
             placeholder="0.00"
@@ -93,8 +94,8 @@ export function OrderForm() {
           </label>
           <input
             type="number"
-            step="0.0001"
-            min="0.0001"
+            step="1"
+            min="1"
             value={quantity}
             onChange={(e) => setQuantity(e.target.value)}
             placeholder="0"
@@ -110,9 +111,10 @@ export function OrderForm() {
               Total:{" "}
             </span>
             <span className="font-mono text-sm text-[hsl(var(--foreground))]">
+              $
               {(parseFloat(price) * parseFloat(quantity)).toLocaleString(
                 "en-US",
-                { minimumFractionDigits: 2, maximumFractionDigits: 2 }
+                { minimumFractionDigits: 2, maximumFractionDigits: 6 }
               )}
             </span>
           </div>

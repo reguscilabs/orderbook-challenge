@@ -2,10 +2,11 @@
 
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 import { formatPrice, formatQuantity } from "@/lib/utils";
 
-export function OrderBook() {
-  const orderBook = useQuery(api.orders.getOrderBook);
+export function OrderBook({ tokenId }: { tokenId: Id<"tokens"> }) {
+  const orderBook = useQuery(api.orders.getOrderBook, { tokenId });
 
   if (!orderBook) {
     return (

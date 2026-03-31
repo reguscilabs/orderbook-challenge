@@ -2,10 +2,11 @@
 
 import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
+import { Id } from "../../convex/_generated/dataModel";
 import { formatPrice, formatQuantity } from "@/lib/utils";
 
-export function TradeList() {
-  const trades = useQuery(api.trades.getRecent);
+export function TradeList({ tokenId }: { tokenId: Id<"tokens"> }) {
+  const trades = useQuery(api.trades.getRecent, { tokenId });
 
   return (
     <div className="rounded-lg border border-[hsl(var(--border))] bg-[hsl(var(--card))] p-4">
