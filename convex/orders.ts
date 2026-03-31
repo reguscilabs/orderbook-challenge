@@ -3,11 +3,13 @@ import { v } from "convex/values";
 import { matchOrder } from "./_matching";
 
 export const getOrderBook = query({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    tokenId: v.id("tokens"),
+  },
+  handler: async (ctx, args) => {
     const openOrders = await ctx.db
       .query("orders")
-      .withIndex("by_side_status")
+      .withIndex("by_token_side_status", (q) => q.eq("tokenId", args.tokenId))
       .filter((q) =>
         q.or(
           q.eq(q.field("status"), "open"),
@@ -30,6 +32,7 @@ export const getOrderBook = query({
 
 export const placeOrder = mutation({
   args: {
+    tokenId: v.id("tokens"),
     side: v.union(v.literal("buy"), v.literal("sell")),
     price: v.number(),
     quantity: v.number(),
@@ -37,6 +40,7 @@ export const placeOrder = mutation({
   },
   handler: async (ctx, args) => {
     const orderId = await ctx.db.insert("orders", {
+      tokenId: args.tokenId,
       side: args.side,
       price: args.price,
       quantity: args.quantity,

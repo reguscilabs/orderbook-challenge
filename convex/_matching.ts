@@ -10,6 +10,7 @@ import { Id } from "./_generated/dataModel";
  * - Match at the existing (older) order's price
  * - Price-time priority: best price first, then earliest order
  * - Partial fills supported
+ * - Only matches orders for the same token
  */
 export async function matchOrder(
   ctx: MutationCtx,
@@ -20,19 +21,18 @@ export async function matchOrder(
 
   const oppositeSide = order.side === "buy" ? "sell" : "buy";
 
-  // Get all open/partial orders on the opposite side
+  // Get open + partial orders on the opposite side for the same token
   const candidates = await ctx.db
     .query("orders")
-    .withIndex("by_side_status", (q) =>
-      q.eq("side", oppositeSide).eq("status", "open")
+    .withIndex("by_token_side_status", (q) =>
+      q.eq("tokenId", order.tokenId).eq("side", oppositeSide).eq("status", "open")
     )
     .collect();
 
-  // Also include partially filled orders
   const partialCandidates = await ctx.db
     .query("orders")
-    .withIndex("by_side_status", (q) =>
-      q.eq("side", oppositeSide).eq("status", "partial")
+    .withIndex("by_token_side_status", (q) =>
+      q.eq("tokenId", order.tokenId).eq("side", oppositeSide).eq("status", "partial")
     )
     .collect();
 
@@ -64,6 +64,7 @@ export async function matchOrder(
 
     // Create trade
     await ctx.db.insert("trades", {
+      tokenId: order.tokenId,
       buyOrderId: order.side === "buy" ? orderId : candidate._id,
       sellOrderId: order.side === "sell" ? orderId : candidate._id,
       price: matchPrice,
