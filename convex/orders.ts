@@ -1,6 +1,6 @@
 import { query, mutation } from "./_generated/server";
 import { v } from "convex/values";
-import { matchOrder } from "./matching";
+import { matchOrder } from "./_matching";
 
 export const getOrderBook = query({
   args: {},
